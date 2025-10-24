@@ -1,0 +1,27 @@
+# Core dependencies
+torch>=2.0.0
+torchvision>=0.15.0
+numpy>=1.24.0
+opencv-python>=4.8.0
+Pillow>=10.0.0
+
+# Image restoration libraries
+basicsr>=1.4.2
+realesrgan>=0.3.0
+facexlib>=0.3.0
+
+# Utilities
+tqdm>=4.65.0
+pyyaml>=6.0
+scikit-image>=0.21.0
+
+# Metrics
+lpips>=0.1.4
+
+# Demo (optional)
+gradio>=3.50.0
+
+# Development (optional)
+pytest>=7.4.0
+black>=23.0.0
+flake8>=6.0.0
