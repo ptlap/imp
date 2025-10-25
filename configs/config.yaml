@@ -1,0 +1,83 @@
+# IMP (Image Restoration Project) Configuration File
+# This file contains all configuration options for the image restoration pipeline
+
+# Model configurations
+models:
+  # Denoising module settings
+  denoising:
+    # Type of denoising algorithm to use
+    # Options: "opencv" (fast, CPU-based) or "nafnet" (high quality, GPU-based)
+    type: "opencv"
+    
+    # Denoising strength parameter (1-100)
+    # Higher values = more aggressive denoising but may lose details
+    # Recommended: 10 for light noise, 20-30 for heavy noise
+    strength: 10
+    
+    # Skip denoising step entirely
+    skip: false
+  
+  # Super-resolution module settings
+  super_resolution:
+    # Type of super-resolution model
+    # Currently only "realesrgan" is supported
+    type: "realesrgan"
+    
+    # Upscaling factor
+    # Options: 2 (2x upscale) or 4 (4x upscale)
+    scale: 4
+    
+    # Tile size for processing large images (in pixels)
+    # Larger tiles = faster but more memory usage
+    # Recommended: 512 for 4GB GPU, 1024 for 8GB+ GPU
+    tile_size: 512
+    
+    # Overlap between tiles (in pixels)
+    # Larger overlap = smoother blending but slower processing
+    # Recommended: 10-15% of tile_size
+    tile_overlap: 64
+    
+    # Use FP16 (half precision) for inference
+    # Reduces memory usage by ~50% with minimal quality loss
+    # Recommended: true for GPUs with limited memory
+    use_fp16: true
+    
+    # URL to download pre-trained weights
+    # Multiple mirrors can be added in code for fallback
+    weights_url: "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesrgan-x4plus.pth"
+    
+    # Skip super-resolution step entirely
+    skip: false
+
+# Processing pipeline settings
+processing:
+  # Maximum image dimension (width or height) before automatic resizing
+  # Images larger than this will be resized during preprocessing
+  # Recommended: 2048 for most cases, 4096 for high-end GPUs
+  max_image_size: 2048
+  
+  # Save intermediate results after each processing step
+  # Useful for debugging but increases disk usage
+  save_intermediate: false
+  
+  # Enable checkpoint system for resuming interrupted processing
+  # Checkpoints allow resuming from the last completed step
+  checkpoint_enabled: true
+  
+  # Directory to store checkpoint files
+  # Relative or absolute path
+  checkpoint_dir: "./checkpoints"
+
+# Logging configuration
+logging:
+  # Log level
+  # Options: "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"
+  # DEBUG: Detailed information for debugging
+  # INFO: General information about processing steps
+  # WARNING: Warning messages for potential issues
+  # ERROR: Error messages for failures
+  level: "INFO"
+  
+  # Log file path
+  # Logs will be written to both console and this file
+  file: "imp.log"
