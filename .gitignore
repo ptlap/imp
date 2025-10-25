@@ -79,3 +79,9 @@ experiments/
 tmp/
 temp/
 *.tmp
+
+# Kiro IDE
+.kiro/
+
+# Documentation (except README.md)
+docs/
