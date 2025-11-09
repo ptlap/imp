@@ -8,6 +8,8 @@ Hệ thống phục chế ảnh cũ tự động sử dụng Deep Learning.
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ptlap/imp/blob/main/notebooks/01_quick_start.ipynb)
 
+📖 **[Hướng dẫn chi tiết bằng tiếng Việt](docs/HUONG_DAN_COLAB.md)**
+
 ```python
 # Clone và cài đặt
 !git clone https://github.com/ptlap/imp.git
