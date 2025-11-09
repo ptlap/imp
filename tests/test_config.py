@@ -11,6 +11,9 @@ from src.config import (
     Config,
     DenoisingConfig,
     SuperResolutionConfig,
+    ColorizationConfig,
+    FaceDetectionConfig,
+    FaceEnhancementConfig,
     ModelsConfig,
     ProcessingConfig,
     LoggingConfig
@@ -70,6 +73,93 @@ class TestSuperResolutionConfig:
         assert config.skip == True
 
 
+class TestColorizationConfig:
+    """Test suite for ColorizationConfig"""
+    
+    def test_default_values(self):
+        """Test ColorizationConfig has correct default values"""
+        config = ColorizationConfig()
+        
+        assert config.type == "ddcolor"
+        assert config.weights_path is None
+        assert "ddcolor" in config.weights_url.lower()
+        assert config.skip == False
+        assert config.use_fp16 == True
+    
+    def test_custom_values(self):
+        """Test ColorizationConfig with custom values"""
+        config = ColorizationConfig(
+            weights_path="/custom/weights.pth",
+            skip=True,
+            use_fp16=False
+        )
+        
+        assert config.weights_path == "/custom/weights.pth"
+        assert config.skip == True
+        assert config.use_fp16 == False
+
+
+class TestFaceDetectionConfig:
+    """Test suite for FaceDetectionConfig"""
+    
+    def test_default_values(self):
+        """Test FaceDetectionConfig has correct default values"""
+        config = FaceDetectionConfig()
+        
+        assert config.type == "retinaface"
+        assert config.weights_path is None
+        assert "retinaface" in config.weights_url.lower()
+        assert config.confidence_threshold == 0.8
+        assert config.max_faces == 10
+        assert config.skip == False
+        assert config.use_fp16 == True
+    
+    def test_custom_values(self):
+        """Test FaceDetectionConfig with custom values"""
+        config = FaceDetectionConfig(
+            weights_path="/custom/weights.pth",
+            confidence_threshold=0.9,
+            max_faces=5,
+            skip=True,
+            use_fp16=False
+        )
+        
+        assert config.weights_path == "/custom/weights.pth"
+        assert config.confidence_threshold == 0.9
+        assert config.max_faces == 5
+        assert config.skip == True
+        assert config.use_fp16 == False
+
+
+class TestFaceEnhancementConfig:
+    """Test suite for FaceEnhancementConfig"""
+    
+    def test_default_values(self):
+        """Test FaceEnhancementConfig has correct default values"""
+        config = FaceEnhancementConfig()
+        
+        assert config.type == "codeformer"
+        assert config.weights_path is None
+        assert "codeformer" in config.weights_url.lower()
+        assert config.fidelity == 0.7
+        assert config.skip == False
+        assert config.use_fp16 == True
+    
+    def test_custom_values(self):
+        """Test FaceEnhancementConfig with custom values"""
+        config = FaceEnhancementConfig(
+            weights_path="/custom/weights.pth",
+            fidelity=0.5,
+            skip=True,
+            use_fp16=False
+        )
+        
+        assert config.weights_path == "/custom/weights.pth"
+        assert config.fidelity == 0.5
+        assert config.skip == True
+        assert config.use_fp16 == False
+
+
 class TestProcessingConfig:
     """Test suite for ProcessingConfig"""
     
@@ -125,6 +215,9 @@ class TestConfig:
         assert isinstance(config.models, ModelsConfig)
         assert isinstance(config.models.denoising, DenoisingConfig)
         assert isinstance(config.models.super_resolution, SuperResolutionConfig)
+        assert isinstance(config.models.colorization, ColorizationConfig)
+        assert isinstance(config.models.face_detection, FaceDetectionConfig)
+        assert isinstance(config.models.face_enhancement, FaceEnhancementConfig)
         assert isinstance(config.processing, ProcessingConfig)
         assert isinstance(config.logging, LoggingConfig)
     
@@ -159,6 +252,21 @@ models:
     tile_overlap: 32
     use_fp16: false
     skip: false
+  colorization:
+    type: ddcolor
+    skip: false
+    use_fp16: true
+  face_detection:
+    type: retinaface
+    confidence_threshold: 0.9
+    max_faces: 5
+    skip: false
+    use_fp16: true
+  face_enhancement:
+    type: codeformer
+    fidelity: 0.5
+    skip: false
+    use_fp16: true
 
 processing:
   max_image_size: 4096
@@ -179,6 +287,10 @@ logging:
             assert config.models.denoising.strength == 15
             assert config.models.super_resolution.scale == 2
             assert config.models.super_resolution.tile_size == 256
+            assert config.models.colorization.type == "ddcolor"
+            assert config.models.face_detection.confidence_threshold == 0.9
+            assert config.models.face_detection.max_faces == 5
+            assert config.models.face_enhancement.fidelity == 0.5
             assert config.processing.max_image_size == 4096
             assert config.processing.save_intermediate == True
             assert config.logging.level == "DEBUG"
@@ -333,6 +445,78 @@ models:
         config.logging.level = "INVALID"
         
         with pytest.raises(ConfigurationError, match="Invalid logging level"):
+            config.validate()
+    
+    def test_validate_invalid_colorization_type(self):
+        """Test validation fails for invalid colorization type"""
+        config = Config.default()
+        config.models.colorization.type = "invalid"
+        
+        with pytest.raises(ConfigurationError, match="Invalid colorization type"):
+            config.validate()
+    
+    def test_validate_invalid_face_detection_type(self):
+        """Test validation fails for invalid face detection type"""
+        config = Config.default()
+        config.models.face_detection.type = "invalid"
+        
+        with pytest.raises(ConfigurationError, match="Invalid face detection type"):
+            config.validate()
+    
+    def test_validate_invalid_confidence_threshold_low(self):
+        """Test validation fails for confidence threshold too low"""
+        config = Config.default()
+        config.models.face_detection.confidence_threshold = -0.1
+        
+        with pytest.raises(ConfigurationError, match="Invalid confidence_threshold"):
+            config.validate()
+    
+    def test_validate_invalid_confidence_threshold_high(self):
+        """Test validation fails for confidence threshold too high"""
+        config = Config.default()
+        config.models.face_detection.confidence_threshold = 1.1
+        
+        with pytest.raises(ConfigurationError, match="Invalid confidence_threshold"):
+            config.validate()
+    
+    def test_validate_invalid_max_faces_low(self):
+        """Test validation fails for max_faces too low"""
+        config = Config.default()
+        config.models.face_detection.max_faces = 0
+        
+        with pytest.raises(ConfigurationError, match="Invalid max_faces"):
+            config.validate()
+    
+    def test_validate_invalid_max_faces_high(self):
+        """Test validation fails for max_faces too high"""
+        config = Config.default()
+        config.models.face_detection.max_faces = 21
+        
+        with pytest.raises(ConfigurationError, match="Invalid max_faces"):
+            config.validate()
+    
+    def test_validate_invalid_face_enhancement_type(self):
+        """Test validation fails for invalid face enhancement type"""
+        config = Config.default()
+        config.models.face_enhancement.type = "invalid"
+        
+        with pytest.raises(ConfigurationError, match="Invalid face enhancement type"):
+            config.validate()
+    
+    def test_validate_invalid_fidelity_low(self):
+        """Test validation fails for fidelity too low"""
+        config = Config.default()
+        config.models.face_enhancement.fidelity = -0.1
+        
+        with pytest.raises(ConfigurationError, match="Invalid fidelity"):
+            config.validate()
+    
+    def test_validate_invalid_fidelity_high(self):
+        """Test validation fails for fidelity too high"""
+        config = Config.default()
+        config.models.face_enhancement.fidelity = 1.1
+        
+        with pytest.raises(ConfigurationError, match="Invalid fidelity"):
             config.validate()
     
     def test_validate_multiple_errors(self):

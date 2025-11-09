@@ -90,3 +90,54 @@ class OutOfMemoryError(IMPError):
         - Tiling strategy insufficient for image size
     """
     pass
+
+
+class ColorizationError(ProcessingError):
+    """
+    Exception raised during colorization operations.
+    
+    Raised when:
+    - Colorization model inference fails
+    - Color space conversion fails
+    - Invalid image format for colorization
+    
+    Examples:
+        - DDColor model inference error
+        - Lab color space conversion failure
+        - GPU out of memory during colorization
+    """
+    pass
+
+
+class FaceDetectionError(ProcessingError):
+    """
+    Exception raised during face detection operations.
+    
+    Raised when:
+    - Face detection model inference fails
+    - Invalid image format for face detection
+    - Face region extraction fails
+    
+    Examples:
+        - RetinaFace model inference error
+        - Invalid bounding box coordinates
+        - GPU out of memory during face detection
+    """
+    pass
+
+
+class FaceEnhancementError(ProcessingError):
+    """
+    Exception raised during face enhancement operations.
+    
+    Raised when:
+    - Face enhancement model inference fails
+    - Face blending operation fails
+    - Invalid face region format
+    
+    Examples:
+        - CodeFormer model inference error
+        - Poisson blending failure
+        - GPU out of memory during face enhancement
+    """
+    pass

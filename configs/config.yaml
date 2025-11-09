@@ -48,6 +48,77 @@ models:
     
     # Skip super-resolution step entirely
     skip: false
+  
+  # Colorization module settings (NEW in v0.2.0)
+  colorization:
+    # Type of colorization model
+    # Currently only "ddcolor" is supported
+    type: "ddcolor"
+    
+    # Path to pre-trained weights (optional, will use weights_url if not specified)
+    weights_path: null
+    
+    # URL to download pre-trained weights
+    weights_url: "https://huggingface.co/piddnad/DDColor/resolve/main/ddcolor_paper.pth"
+    
+    # Skip colorization step entirely
+    # Note: Colorization is only applied to grayscale images
+    skip: false
+    
+    # Use FP16 (half precision) for inference
+    # Reduces memory usage by ~50% with minimal quality loss
+    use_fp16: true
+  
+  # Face detection module settings (NEW in v0.2.0)
+  face_detection:
+    # Type of face detection model
+    # Currently only "retinaface" is supported
+    type: "retinaface"
+    
+    # Path to pre-trained weights (optional, will use weights_url if not specified)
+    weights_path: null
+    
+    # URL to download pre-trained weights
+    weights_url: "https://github.com/ternaus/retinaface/releases/download/0.0.1/retinaface_resnet50.pth"
+    
+    # Minimum confidence threshold for face detection (0.0-1.0)
+    # Higher values = fewer false positives but may miss some faces
+    # Recommended: 0.8 for most cases
+    confidence_threshold: 0.8
+    
+    # Maximum number of faces to detect per image (1-20)
+    # Faces are sorted by confidence score
+    max_faces: 10
+    
+    # Skip face detection step entirely
+    skip: false
+    
+    # Use FP16 (half precision) for inference
+    use_fp16: true
+  
+  # Face enhancement module settings (NEW in v0.2.0)
+  face_enhancement:
+    # Type of face enhancement model
+    # Currently only "codeformer" is supported
+    type: "codeformer"
+    
+    # Path to pre-trained weights (optional, will use weights_url if not specified)
+    weights_path: null
+    
+    # URL to download pre-trained weights
+    weights_url: "https://github.com/sczhou/CodeFormer/releases/download/v0.1.0/codeformer.pth"
+    
+    # Fidelity parameter (0.0-1.0)
+    # 0.0 = prioritize quality (more details, may look different)
+    # 1.0 = prioritize similarity (closer to input, may be less sharp)
+    # Recommended: 0.7 for balanced results
+    fidelity: 0.7
+    
+    # Skip face enhancement step entirely
+    skip: false
+    
+    # Use FP16 (half precision) for inference
+    use_fp16: true
 
 # Processing pipeline settings
 processing:

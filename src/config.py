@@ -29,10 +29,46 @@ class SuperResolutionConfig:
 
 
 @dataclass
+class ColorizationConfig:
+    """Configuration for colorization module."""
+    type: str = "ddcolor"
+    weights_path: Optional[str] = None
+    weights_url: str = "https://huggingface.co/piddnad/DDColor/resolve/main/ddcolor_paper.pth"
+    skip: bool = False
+    use_fp16: bool = True
+
+
+@dataclass
+class FaceDetectionConfig:
+    """Configuration for face detection module."""
+    type: str = "retinaface"
+    weights_path: Optional[str] = None
+    weights_url: str = "https://github.com/ternaus/retinaface/releases/download/0.0.1/retinaface_resnet50.pth"
+    confidence_threshold: float = 0.8
+    max_faces: int = 10
+    skip: bool = False
+    use_fp16: bool = True
+
+
+@dataclass
+class FaceEnhancementConfig:
+    """Configuration for face enhancement module."""
+    type: str = "codeformer"
+    weights_path: Optional[str] = None
+    weights_url: str = "https://github.com/sczhou/CodeFormer/releases/download/v0.1.0/codeformer.pth"
+    fidelity: float = 0.7
+    skip: bool = False
+    use_fp16: bool = True
+
+
+@dataclass
 class ModelsConfig:
     """Configuration for all models."""
     denoising: DenoisingConfig = field(default_factory=DenoisingConfig)
     super_resolution: SuperResolutionConfig = field(default_factory=SuperResolutionConfig)
+    colorization: ColorizationConfig = field(default_factory=ColorizationConfig)
+    face_detection: FaceDetectionConfig = field(default_factory=FaceDetectionConfig)
+    face_enhancement: FaceEnhancementConfig = field(default_factory=FaceEnhancementConfig)
 
 
 @dataclass
@@ -93,15 +129,24 @@ class Config:
                 models_data = data.get('models', {})
                 denoising_data = models_data.get('denoising', {})
                 super_resolution_data = models_data.get('super_resolution', {})
+                colorization_data = models_data.get('colorization', {})
+                face_detection_data = models_data.get('face_detection', {})
+                face_enhancement_data = models_data.get('face_enhancement', {})
                 processing_data = data.get('processing', {})
                 logging_data = data.get('logging', {})
                 
                 # Create config objects
                 denoising_config = DenoisingConfig(**denoising_data)
                 super_resolution_config = SuperResolutionConfig(**super_resolution_data)
+                colorization_config = ColorizationConfig(**colorization_data)
+                face_detection_config = FaceDetectionConfig(**face_detection_data)
+                face_enhancement_config = FaceEnhancementConfig(**face_enhancement_data)
                 models_config = ModelsConfig(
                     denoising=denoising_config,
-                    super_resolution=super_resolution_config
+                    super_resolution=super_resolution_config,
+                    colorization=colorization_config,
+                    face_detection=face_detection_config,
+                    face_enhancement=face_enhancement_config
                 )
                 processing_config = ProcessingConfig(**processing_data)
                 logging_config = LoggingConfig(**logging_data)
@@ -167,6 +212,27 @@ class Config:
         
         if self.models.super_resolution.tile_overlap < 0 or self.models.super_resolution.tile_overlap >= self.models.super_resolution.tile_size:
             errors.append(f"Invalid tile_overlap: {self.models.super_resolution.tile_overlap}. Must be between 0 and tile_size")
+        
+        # Validate colorization config
+        if self.models.colorization.type not in ["ddcolor"]:
+            errors.append(f"Invalid colorization type: {self.models.colorization.type}. Must be 'ddcolor'")
+        
+        # Validate face detection config
+        if self.models.face_detection.type not in ["retinaface"]:
+            errors.append(f"Invalid face detection type: {self.models.face_detection.type}. Must be 'retinaface'")
+        
+        if not (0.0 <= self.models.face_detection.confidence_threshold <= 1.0):
+            errors.append(f"Invalid confidence_threshold: {self.models.face_detection.confidence_threshold}. Must be between 0.0 and 1.0")
+        
+        if not (1 <= self.models.face_detection.max_faces <= 20):
+            errors.append(f"Invalid max_faces: {self.models.face_detection.max_faces}. Must be between 1 and 20")
+        
+        # Validate face enhancement config
+        if self.models.face_enhancement.type not in ["codeformer"]:
+            errors.append(f"Invalid face enhancement type: {self.models.face_enhancement.type}. Must be 'codeformer'")
+        
+        if not (0.0 <= self.models.face_enhancement.fidelity <= 1.0):
+            errors.append(f"Invalid fidelity: {self.models.face_enhancement.fidelity}. Must be between 0.0 and 1.0")
         
         # Validate processing config
         if self.processing.max_image_size < 256 or self.processing.max_image_size > 8192:
